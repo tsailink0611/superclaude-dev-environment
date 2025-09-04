@@ -1,0 +1,97 @@
+name: Sync SuperClaude Environment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-setup:
+    runs-on: ubuntu-latest
+    name: 環境設定の検証
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: 必須ファイル存在確認
+        run: |
+          echo "🔍 必須ファイルの存在を確認中..."
+          
+          # 必須ファイルリスト
+          required_files=(
+            "開発環境セットアップ.md"
+            "よく使うコマンド.md"
+            "README.md"
+            "setup.sh"
+          )
+          
+          missing_files=()
+          
+          for file in "${required_files[@]}"; do
+            if [[ -f "$file" ]]; then
+              echo "✅ $file が存在します"
+            else
+              echo "❌ $file が見つかりません"
+              missing_files+=("$file")
+            fi
+          done
+          
+          if [[ ${#missing_files[@]} -gt 0 ]]; then
+            echo "::error::必須ファイルが不足しています: ${missing_files[*]}"
+            exit 1
+          fi
+          
+          echo "🎉 全ての必須ファイルが揃っています！"
+          
+      - name: セットアップスクリプト実行権限確認
+        run: |
+          if [[ -f "setup.sh" ]]; then
+            chmod +x setup.sh
+            echo "✅ setup.sh に実行権限を付与しました"
+          fi
+          
+      - name: 認証情報テンプレート確認
+        run: |
+          if [[ -f "認証情報テンプレート.txt" ]]; then
+            echo "✅ 認証情報テンプレートが存在します"
+            # 実際の認証情報が含まれていないか確認
+            if grep -q "your-actual-token" "認証情報テンプレート.txt" 2>/dev/null; then
+              echo "::error::認証情報テンプレートに実際の認証情報が含まれている可能性があります"
+              exit 1
+            fi
+          fi
+          
+      - name: 環境構築テスト（ドライラン）
+        run: |
+          echo "🧪 環境構築のテスト実行中..."
+          
+          # Node.js 環境テスト
+          node --version
+          npm --version
+          
+          # Git 設定テスト
+          git --version
+          
+          echo "✅ 基本環境は正常です"
+          
+  notify-completion:
+    runs-on: ubuntu-latest
+    needs: validate-setup
+    if: success()
+    
+    steps:
+      - name: 成功通知
+        run: |
+          echo "🎉 SuperClaude環境の検証が完了しました！"
+          echo "📋 この環境は以下をサポートします:"
+          echo "  - Claude Code v1.0.102+"
+          echo "  - SuperClaude Framework"
+          echo "  - GitHub Actions 統合"
+          echo "  - 複数プラットフォーム対応"

@@ -1,0 +1,36 @@
+# SuperClaude開発環境 .gitignore
+
+# 認証情報ファイル（テンプレートのみコミット）
+認証情報.txt
+auth-info.txt
+*.env
+.env*
+
+# 個人設定
+config/personal/
+settings/private/
+
+# IDE・エディタ設定
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS生成ファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ログファイル
+*.log
+logs/
+
+# 一時ファイル
+tmp/
+temp/
+*.tmp
+
+# バックアップファイル
+*.bak
+*.backup
+*~
